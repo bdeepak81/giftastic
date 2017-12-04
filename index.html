@@ -3,15 +3,39 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Quoth the Giphy</title>
+  <title>Giftastic</title>
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 </head>
 
 <body>
-  <button data-person="Arnold Schwarzenegger">I'll be back</button>
+  <div class="jumbotron">
+      <h1 class="text-center"><strong>Giftastic!</strong></h1>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8">
+          <div id="buttons-list"></div>
+          <div id="image-display"></div>
+      </div>
+      <div class="col-lg-4">
+          <form id="animal-form">
+            <label for="animal-input">Add an Animal</label>
+            <input type="text" id="animal-input"><br>
+
+            <!-- Button triggers new movie to be added -->
+            <input id="add-animal" type="submit" value="Add an Animal">
+          </form>
+      </div>
+    </div>
+  </div>
+
+
+<!--   <button data-person="Arnold Schwarzenegger">I'll be back</button>
   <button data-person="Michael J Fox">
     My happiness grows in direct proportionto my acceptance,
     and in inverse proportion to my expectations.
-  </button>
+  </button> -->
   <!-- STEP TWO: between the dashed lines below
         * add three more buttons
         * add a data-person attribute of famous people you know
@@ -25,76 +49,121 @@
   5. On click of another button rerender the image block with new images of the movie name clicked.
    -->
 
-
-  <button data-person="Lucille Ball">
-    Love yourself first and everything else falls into line.
-  </button>
-  <button data-person="Taylor Swift">
-    If you're horrible to me, I'm going to write a song about it,
-    and you won't like it. That's how I operate.
-  </button>
-  <button data-person="Samuel Jackson">
-    Far better is it to dare mighty things, to win glorious triumphs,
-    even though checkered by failure... than to rank with those poor spirits who
-    neither enjoy nor suffer much, because they live in a gray twilight that
-    knows not victory nor defeat.
-  </button>
-
-  <div id="gifs-appear-here">
-  </div>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script type="text/javascript">
-    // Event listener for all button elements
-    $("button").on("click", function() {
-      // In this case, the "this" keyword refers to the button that was clicked
-      var person = $(this).attr("data-person");
+    
+    var animals = ["Tiger", "Lion", "Elephant", "Monkey"];
 
-      // Constructing a URL to search Giphy for the name of the person who said the quote
-      var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
-        person + "&api_key=dc6zaTOxFJmzC&limit=10";
+    function displayAnimalInfo() {
 
-      // Performing our AJAX GET request
-      $.ajax({
+        var animals = $(this).attr("data-name");
+        var queryURL = "https://www.omdbapi.com/?t=" + animals + "&y=&plot=short&apikey=trilogy";
+
+        // Creates AJAX call for the specific movie button being clicked
+        $.ajax({
           url: queryURL,
           method: "GET"
-        })
-        // After the data comes back from the API
-        .done(function(response) {
-          // Storing an array of results in the results variable
-          var results = response.data;
+        }).done(function(response) {
 
-          // Looping over every result item
-          for (var i = 0; i < results.length; i++) {
+          // YOUR CODE GOES HERE!!!
 
-            // Only taking action if the photo has an appropriate rating
-            if (results[i].rating !== "r" && results[i].rating !== "pg-13") {
-              // Creating a div with the class "item"
-              var gifDiv = $("<div class='item'>");
-
-              // Storing the result item's rating
-              var rating = results[i].rating;
-
-              // Creating a paragraph tag with the result item's rating
-              var p = $("<p>").text("Rating: " + rating);
-
-              // Creating an image tag
-              var personImage = $("<img>");
-
-              // Giving the image tag an src attribute of a proprty pulled off the
-              // result item
-              personImage.attr("src", results[i].images.fixed_height.url);
-
-              // Appending the paragraph and personImage we created to the "gifDiv" div we created
-              gifDiv.append(p);
-              gifDiv.append(personImage);
-
-              // Prepending the gifDiv to the "#gifs-appear-here" div in the HTML
-              $("#gifs-appear-here").prepend(gifDiv);
-            }
-          }
         });
-    });
+
+      }
+
+      // Function for displaying movie data
+      function renderButtons() {
+
+        // Deletes the animals prior to adding new animals
+        // (this is necessary otherwise you will have repeat buttons)
+        $("#buttons-list").empty();
+
+        // Loops through the array of movies
+        for (var i = 0; i < animals.length; i++) {
+
+          // Then dynamicaly generates buttons for each animal in the array
+          // This code $("<button>") is all jQuery needs to create the beginning and end tag. (<button></button>)
+          var a = $("<button>");
+          // Adds a class of movie to our button
+          a.addClass("animal");
+          // Added a data-attribute
+          a.attr("data-name", animals[i]);
+          // Provided the initial button text
+          a.text(animals[i]);
+          // Added the button to the buttons-list div
+          $("#buttons-list").append(a);
+        }
+      }
+
+      // This function handles events where the add movie button is clicked
+      $("#add-animal").on("click", function(event) {
+        event.preventDefault();
+        // This line of code will grab the input from the textbox
+        var animal = $("#animal-input").val().trim();
+
+        // The movie from the textbox is then added to our array
+        animals.push(animal);
+
+        // Calling renderButtons which handles the processing of our movie array
+        renderButtons();
+
+      });
+
+      // Adding click event listeners to all elements with a class of "movie"
+      $(document).on("click", ".animal", displayAnimalInfo);
+
+      // Calling the renderButtons function to display the intial buttons
+      renderButtons();
+    // Event listener for all button elements
+    // $("button").on("click", function() {
+    //   // In this case, the "this" keyword refers to the button that was clicked
+    //   var person = $(this).attr("data-person");
+
+    //   // Constructing a URL to search Giphy for the name of the person who said the quote
+    //   var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
+    //     person + "&api_key=dc6zaTOxFJmzC&limit=10";
+
+    //   // Performing our AJAX GET request
+    //   $.ajax({
+    //       url: queryURL,
+    //       method: "GET"
+    //     })
+    //     // After the data comes back from the API
+    //     .done(function(response) {
+    //       // Storing an array of results in the results variable
+    //       var results = response.data;
+
+    //       // Looping over every result item
+    //       for (var i = 0; i < results.length; i++) {
+
+    //         // Only taking action if the photo has an appropriate rating
+    //         if (results[i].rating !== "r" && results[i].rating !== "pg-13") {
+    //           // Creating a div with the class "item"
+    //           var gifDiv = $("<div class='item'>");
+
+    //           // Storing the result item's rating
+    //           var rating = results[i].rating;
+
+    //           // Creating a paragraph tag with the result item's rating
+    //           var p = $("<p>").text("Rating: " + rating);
+
+    //           // Creating an image tag
+    //           var personImage = $("<img>");
+
+    //           // Giving the image tag an src attribute of a proprty pulled off the
+    //           // result item
+    //           personImage.attr("src", results[i].images.fixed_height.url);
+
+    //           // Appending the paragraph and personImage we created to the "gifDiv" div we created
+    //           gifDiv.append(p);
+    //           gifDiv.append(personImage);
+
+    //           // Prepending the gifDiv to the "#gifs-appear-here" div in the HTML
+    //           $("#gifs-appear-here").prepend(gifDiv);
+    //         }
+    //       }
+    //     });
+    // });
   </script>
 </body>
 
